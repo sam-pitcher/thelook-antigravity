@@ -71,6 +71,20 @@ view: order_items {
     type: number
     sql: ${TABLE}.user_id ;;
   }
+
+  measure: orders_items_last_month {
+    type: period_over_period
+    based_on: count
+    based_on_time: created_month
+    period: month
+    kind: previous
+  }
+
+  measure: ytd {
+    type: running_total
+    sql: ${count} ;;
+  }
+
   measure: count {
     type: count
   }
