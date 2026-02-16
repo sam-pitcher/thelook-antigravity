@@ -4,6 +4,7 @@ view: order_items {
   # to be used for all fields in this view.
   sql_table_name: `the_look.order_items` ;;
 
+
   # No primary key is defined for this view. In order to join this view in an Explore,
   # define primary_key: yes on a dimension that has no repeated values.
 
@@ -12,7 +13,7 @@ view: order_items {
 
   dimension_group: created {
     type: time
-    timeframes: [raw, time, date, week, month, quarter, year]
+    timeframes: [raw, time, date, week, month, year]
     sql: ${TABLE}.created_at ;;
   }
 
