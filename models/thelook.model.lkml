@@ -56,6 +56,6 @@ explore: order_items {
 # }
 
 
-explore: users_fact {}
+# explore: users_fact {}
 
 explore: users {}
