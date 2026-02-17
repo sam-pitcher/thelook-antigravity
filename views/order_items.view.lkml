@@ -1,15 +1,9 @@
-# The name of this view in Looker is "Order Items"
+include: "common_fields.view"
 view: order_items {
+  extends: [common_fields]
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
   sql_table_name: `the_look.order_items` ;;
-
-
-  # No primary key is defined for this view. In order to join this view in an Explore,
-  # define primary_key: yes on a dimension that has no repeated values.
-
-  # Dates and timestamps can be represented in Looker using a dimension group of type: time.
-  # Looker converts dates and timestamps to the specified timeframes within the dimension group.
 
   dimension_group: created {
     type: time
@@ -26,11 +20,6 @@ view: order_items {
     # A dimension is a groupable field that can be used to filter query results.
     # This dimension will be called "ID" in Explore.
 
-  dimension: id {
-    type: number
-    sql: ${TABLE}.id ;;
-  }
-
   dimension: inventory_item_id {
     type: number
     sql: ${TABLE}.inventory_item_id ;;
@@ -42,6 +31,7 @@ view: order_items {
   }
 
   dimension: product_id {
+    hidden: yes
     type: number
     sql: ${TABLE}.product_id ;;
   }
@@ -55,6 +45,26 @@ view: order_items {
   dimension: sale_price {
     type: number
     sql: ${TABLE}.sale_price ;;
+  }
+
+  measure: total_sale_price {
+    description: "The global revenue for the look"
+    type: sum
+    sql: ${sale_price} ;;
+    value_format_name: eur_0
+  }
+
+  measure: average_sale_price {
+    type: average
+    sql: ${sale_price} ;;
+    value_format_name: eur_0
+  }
+
+  measure: total_completed_sale_price {
+    type: sum
+    sql: ${sale_price} ;;
+    filters: [status: "Complete"]
+    value_format_name: eur_0
   }
 
   dimension_group: shipped {
@@ -88,5 +98,12 @@ view: order_items {
 
   measure: count {
     type: count
+  }
+}
+
+
+view: +order_items {
+  dimension: status {
+    html: Status: {{status._value}}} ;;
   }
 }

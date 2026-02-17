@@ -1,5 +1,6 @@
-# The name of this view in Looker is "Users"
+include: "common_fields.view"
 view: users {
+  extends: [common_fields]
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
   sql_table_name: `the_look.users` ;;
@@ -14,6 +15,13 @@ view: users {
   dimension: age {
     type: number
     sql: ${TABLE}.age ;;
+  }
+
+  dimension: age_tier {
+    type: tier
+    sql: ${age} ;;
+    tiers: [0,10,30,60]
+    style: integer
   }
 
   dimension: city {
@@ -37,7 +45,15 @@ view: users {
 
   dimension: email {
     type: string
-    sql: ${TABLE}.email ;;
+    # sql: ${TABLE}.email ;;
+    sql:
+    {% if _user_attributes['email'] == 'Yes' %}
+    ${TABLE}.email
+    {% else %}
+    'XXX@example.com'
+    {% endif %}
+    ;;
+    # required_access_grants: [pii_data]
   }
 
   dimension: first_name {
@@ -48,11 +64,6 @@ view: users {
   dimension: gender {
     type: string
     sql: ${TABLE}.gender ;;
-  }
-
-  dimension: id {
-    type: number
-    sql: ${TABLE}.id ;;
   }
 
   dimension: last_name {

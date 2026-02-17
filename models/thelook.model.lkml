@@ -12,18 +12,50 @@ datagroup: thelook_default_datagroup {
   max_cache_age: "1 hour"
 }
 
+datagroup: daily {
+  sql_trigger: SELECT my_changing_column ;;
+}
+
+access_grant: pii_data {
+  user_attribute: can_see_pii
+  allowed_values: ["Yes"]
+}
+
 persist_with: thelook_default_datagroup
 
-# Explores allow you to join together different views (database tables) based on the
-# relationships between fields. By joining a view into an Explore, you make those
-# fields available to users for data analysis.
-# Explores should be purpose-built for specific use cases.
+explore: order_items {
+  # access_filter: {
+  #   field: users.country
+  #   user_attribute: country
+  # }
+  join: users {
+    type: left_outer
+    sql_on: ${order_items.user_id} = ${users.id} ;;
+    relationship: many_to_one
+  }
+}
 
-# To see the Explore you’re building, navigate to the Explore menu and select an Explore under "Thelook"
+# Place in `thelook` model
+# explore: +order_items {
+#   aggregate_table: rollup__created_date {
+#     query: {
+#       dimensions: [
+#         created_date,
+#         status
+#       ]
+#       measures: [total_sale_price]
 
-# To create more sophisticated Explores that involve multiple views, you can use the join parameter.
-# Typically, join parameters require that you define the join type, join relationship, and a sql_on clause.
-# Each joined view also needs to define a primary key.
+#     }
 
-explore: order_items {}
+#     materialization: {
+#       partition_keys: [created_date]
+#       cluster_keys: [status]
+#       datagroup_trigger: daily
+#     }
+#   }
+# }
 
+
+explore: users_fact {}
+
+explore: users {}
