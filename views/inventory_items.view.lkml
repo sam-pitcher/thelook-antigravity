@@ -2,7 +2,7 @@
 view: inventory_items {
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
-  sql_table_name: `the_look.inventory_items` ;;
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.inventory_items` ;;
 
   # No primary key is defined for this view. In order to join this view in an Explore,
   # define primary_key: yes on a dimension that has no repeated values.

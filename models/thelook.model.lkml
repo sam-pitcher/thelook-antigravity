@@ -24,38 +24,16 @@ access_grant: pii_data {
 persist_with: thelook_default_datagroup
 
 explore: order_items {
-  # access_filter: {
-  #   field: users.country
-  #   user_attribute: country
-  # }
+  join: products {
+    type: left_outer
+    sql_on: ${products.id} = ${order_items.product_id} ;;
+    relationship: many_to_one
+  }
   join: users {
     type: left_outer
-    sql_on: ${order_items.user_id} = ${users.id} ;;
+    sql_on: ${users.id} =${order_items.user_id} ;;
     relationship: many_to_one
   }
 }
-
-# Place in `thelook` model
-# explore: +order_items {
-#   aggregate_table: rollup__created_date {
-#     query: {
-#       dimensions: [
-#         created_date,
-#         status
-#       ]
-#       measures: [total_sale_price]
-
-#     }
-
-#     materialization: {
-#       partition_keys: [created_date]
-#       cluster_keys: [status]
-#       datagroup_trigger: daily
-#     }
-#   }
-# }
-
-
-# explore: users_fact {}
 
 explore: users {}

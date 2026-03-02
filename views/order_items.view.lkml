@@ -1,9 +1,7 @@
 include: "common_fields.view"
 view: order_items {
   extends: [common_fields]
-  # The sql_table_name parameter indicates the underlying database table
-  # to be used for all fields in this view.
-  sql_table_name: `the_look.order_items` ;;
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.order_items` ;;
 
   dimension_group: created {
     type: time
@@ -16,9 +14,6 @@ view: order_items {
     timeframes: [raw, time, date, week, month, quarter, year]
     sql: ${TABLE}.delivered_at ;;
   }
-    # Here's what a typical dimension looks like in LookML.
-    # A dimension is a groupable field that can be used to filter query results.
-    # This dimension will be called "ID" in Explore.
 
   dimension: inventory_item_id {
     type: number
@@ -42,31 +37,6 @@ view: order_items {
     sql: ${TABLE}.returned_at ;;
   }
 
-  dimension: sale_price {
-    type: number
-    sql: ${TABLE}.sale_price ;;
-  }
-
-  measure: total_sale_price {
-    description: "The global revenue for the look"
-    type: sum
-    sql: ${sale_price} ;;
-    value_format_name: eur_0
-  }
-
-  measure: average_sale_price {
-    type: average
-    sql: ${sale_price} ;;
-    value_format_name: eur_0
-  }
-
-  measure: total_completed_sale_price {
-    type: sum
-    sql: ${sale_price} ;;
-    filters: [status: "Complete"]
-    value_format_name: eur_0
-  }
-
   dimension_group: shipped {
     type: time
     timeframes: [raw, time, date, week, month, quarter, year]
@@ -83,27 +53,25 @@ view: order_items {
     sql: ${TABLE}.user_id ;;
   }
 
-  measure: orders_items_last_month {
-    type: period_over_period
-    based_on: count
-    based_on_time: created_month
-    period: month
-    kind: previous
+  dimension: sale_price {
+    hidden: yes
+    type: number
+    sql: ${TABLE}.sale_price ;;
   }
 
-  measure: ytd {
-    type: running_total
-    sql: ${count} ;;
+  measure: total_sale_price {
+    type: sum
+    sql: ${sale_price} ;;
+    value_format_name: eur_0
   }
 
-  measure: count {
+  measure: average_sale_price {
+    type: average
+    sql: ${sale_price} ;;
+    value_format_name: eur_0
+  }
+
+  measure: total_quantity {
     type: count
-  }
-}
-
-
-view: +order_items {
-  dimension: status {
-    html: Status: {{status._value}}} ;;
   }
 }
