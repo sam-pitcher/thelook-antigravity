@@ -25,12 +25,6 @@ view: order_items {
     sql: ${TABLE}.order_id ;;
   }
 
-  dimension: product_id {
-    hidden: yes
-    type: number
-    sql: ${TABLE}.product_id ;;
-  }
-
   dimension_group: returned {
     type: time
     timeframes: [raw, time, date, week, month, quarter, year]
