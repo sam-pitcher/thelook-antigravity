@@ -1,6 +1,8 @@
 view: status {
   derived_table: {
     datagroup_trigger: daily
+    increment_key: "timestamp"
+    increment_offset: 1
     sql: SELECT
         event_id,
         timestamp,
@@ -15,14 +17,16 @@ view: status {
               timestamp,
               CONCAT(
                 'Analyze this conversational agent log. Classify it into exactly one of these categories: ',
-                '1. MISSING_DATA: If the agent says it lacks a field, column, or access to a specific table. ',
-                '2. DISAMBIGUATION: If the agent asks for clarification or is confused between multiple options. ',
-                '3. SUCCESS: If the agent successfully answered or is processing a query. ',
-                '4. ERROR: For hallucinations or "field not found" messages. ',
+                'MISSING_DATA: If the agent says there are no values or access to a specific table. ',
+                'MISSING_FIELD: If the agent says it lacks a field or column. The the fields needed to calculate the requested measure. ',
+                'DISAMBIGUATION: If the agent asks for clarification or is confused between multiple options. ',
+                'SUCCESS: If the agent successfully answered or is processing a query. ',
+                'ERROR: For hallucinations or "field not found" messages. ',
                 'Return ONLY the category name. Content to analyze: ', content
               ) AS prompt
             FROM
               `sampitcher-playground.conversation_logs.interaction_logs`
+            WHERE {% incrementcondition %} timestamp {%  endincrementcondition %}
           ),
           STRUCT(
             0.1 AS temperature,

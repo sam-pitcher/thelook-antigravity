@@ -7,6 +7,7 @@ view: interaction_logs {
     timestamp,
     conversation_id,
     message_id,
+    event_id,
     user_query,
     agent_id,
     interaction_type,
@@ -64,6 +65,11 @@ FROM
   dimension: user_query {
     type: string
     sql: ${TABLE}.user_query ;;
+  }
+
+  dimension: event_id {
+    type: string
+    sql: ${TABLE}.event_id ;;
   }
 
   dimension: conversation_id {
