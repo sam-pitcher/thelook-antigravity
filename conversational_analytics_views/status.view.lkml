@@ -86,8 +86,7 @@ view: status_missing_field {
                 'It has been flagged that the user asked a question, but the required field doesnt exist.',
                 'Question user asked: ', user_query,
                 'Content to analyze: ', content,
-                'Return the name of the missing field and a small description of the field in this format:',
-                '{"field_name": "FIELD_NAME", "description": "description of the field..."}'
+                'Return ONLY the name of the missing field.'
               ) AS prompt
             FROM
               ${status.SQL_TABLE_NAME}
