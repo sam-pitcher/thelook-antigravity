@@ -20,6 +20,8 @@ view: order_items {
     sql: ${TABLE}.inventory_item_id ;;
   }
 
+  dimension: product_id {}
+
   dimension: order_id {
     type: number
     sql: ${TABLE}.order_id ;;
@@ -67,5 +69,10 @@ view: order_items {
 
   measure: total_quantity {
     type: count
+  }
+
+  measure: total_unique_quantity {
+    type: count_distinct
+    sql: ${product_id} ;;
   }
 }

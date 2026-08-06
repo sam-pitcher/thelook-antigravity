@@ -22,6 +22,7 @@ view: status {
               CONCAT(
                 'Analyze this conversational agent log. Classify it into exactly one of these categories: ',
                 'MISSING_DATA: If the agent says there are no values or access to a specific table. ',
+                'INCORRECT_DATA_DOMAIN: Agent has replied that the question is not related to this data. ',
                 'MISSING_FIELD: If the agent says it lacks a field or column. The the fields needed to calculate the requested measure. ',
                 'DISAMBIGUATION: If the agent asks for clarification or is confused between multiple options. ',
                 'SUCCESS: If the agent successfully answered or is processing a query. ',
@@ -40,6 +41,8 @@ view: status {
           )
         ) ;;
   }
+
+  # embeddings on user input querys. use this to upgrade golden queries.
 
   dimension: event_id {
     type: string
