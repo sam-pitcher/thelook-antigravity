@@ -1,7 +1,15 @@
 include: "common_fields.view"
+
 view: order_items {
   extends: [common_fields]
   sql_table_name: `sampitcher-playground.the_look_ca.order_items_table` ;;
+
+  # Primary key defined
+  dimension: id {
+    primary_key: yes
+    type: number
+    sql: ${TABLE}.id ;;
+  }
 
   dimension_group: created {
     type: time
@@ -20,7 +28,10 @@ view: order_items {
     sql: ${TABLE}.inventory_item_id ;;
   }
 
-  dimension: product_id {}
+  dimension: product_id {
+    type: number
+    sql: ${TABLE}.product_id ;;
+  }
 
   dimension: order_id {
     type: number
@@ -50,29 +61,24 @@ view: order_items {
   }
 
   dimension: sale_price {
-    hidden: yes
     type: number
     sql: ${TABLE}.sale_price ;;
   }
 
+  # ANTI-PATTERN 8: Table calculation-like un-aggregated field exposed as a measure
   measure: total_sale_price {
     type: sum
     sql: ${sale_price} ;;
-    value_format_name: eur_0
+    value_format_name: usd
   }
 
   measure: average_sale_price {
     type: average
     sql: ${sale_price} ;;
-    value_format_name: eur_0
+    value_format_name: usd
   }
 
-  measure: total_quantity {
+  measure: count {
     type: count
-  }
-
-  measure: total_unique_quantity {
-    type: count_distinct
-    sql: ${product_id} ;;
   }
 }

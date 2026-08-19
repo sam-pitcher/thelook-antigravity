@@ -1,26 +1,25 @@
 include: "common_fields.view"
+
 view: users {
   extends: [common_fields]
-  # The sql_table_name parameter indicates the underlying database table
-  # to be used for all fields in this view.
   sql_table_name: `sampitcher-playground.the_look_ca.users_table` ;;
 
-  # No primary key is defined for this view. In order to join this view in an Explore,
-  # define primary_key: yes on a dimension that has no repeated values.
+  # ANTI-PATTERN 5: Primary key omitted - triggers Symmetric Aggregates & inaccurate distinct hashes
+  dimension: id {
+    type: number
+    sql: ${TABLE}.id ;;
+  }
 
-    # Here's what a typical dimension looks like in LookML.
-    # A dimension is a groupable field that can be used to filter query results.
-    # This dimension will be called "Age" in Explore.
-
-  dimension: age {
+  # ANTI-PATTERN 6: ALL_CAPS naming with no description
+  dimension: USER_AGE {
     type: number
     sql: ${TABLE}.age ;;
   }
 
   dimension: age_tier {
     type: tier
-    sql: ${age} ;;
-    tiers: [0,10,30,60]
+    sql: ${USER_AGE} ;;
+    tiers: [0, 10, 30, 60]
     style: integer
   }
 
@@ -34,8 +33,6 @@ view: users {
     map_layer_name: countries
     sql: ${TABLE}.country ;;
   }
-  # Dates and timestamps can be represented in Looker using a dimension group of type: time.
-  # Looker converts dates and timestamps to the specified timeframes within the dimension group.
 
   dimension_group: created {
     type: time
@@ -45,15 +42,13 @@ view: users {
 
   dimension: email {
     type: string
-    # sql: ${TABLE}.email ;;
     sql:
-    {% if _user_attributes['email'] == 'Yes' %}
+    {% if _user_attributes[email] == Yes %}
     ${TABLE}.email
     {% else %}
-    'XXX@example.com'
+    XXX@example.com
     {% endif %}
     ;;
-    # required_access_grants: [pii_data]
   }
 
   dimension: first_name {
@@ -61,14 +56,20 @@ view: users {
     sql: ${TABLE}.first_name ;;
   }
 
-  dimension: gender {
-    type: string
-    sql: ${TABLE}.gender ;;
-  }
-
   dimension: last_name {
     type: string
     sql: ${TABLE}.last_name ;;
+  }
+
+  # ANTI-PATTERN 7: PascalCase naming
+  dimension: FullCustomerName {
+    type: string
+    sql: CONCAT(${first_name}, " ", ${last_name}) ;;
+  }
+
+  dimension: gender {
+    type: string
+    sql: ${TABLE}.gender ;;
   }
 
   dimension: latitude {
@@ -105,6 +106,7 @@ view: users {
     type: string
     sql: ${TABLE}.user_geom ;;
   }
+
   measure: count {
     type: count
     drill_fields: [last_name, first_name]
