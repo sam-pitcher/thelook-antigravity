@@ -27,6 +27,12 @@ explore: order_items {
     relationship: many_to_one
   }
 
+  join: user_order_facts {
+    type: left_outer
+    relationship: one_to_one
+    sql_on: ${user_order_facts.user_id} = ${order_items.user_id} ;;
+  }
+
   join: inventory_items {
     type: left_outer
     relationship: one_to_one
@@ -54,9 +60,15 @@ explore: order_items {
     relationship: one_to_one
     sql_on: ${events.user_id} = ${order_items.user_id} ;;
   }
+
+  # ANTI-PATTERN 4: Cartesian Cross Join multiplies rows exponentially
+  join: distribution_centers {
+    type: cross
+    relationship: one_to_one
+  }
 }
 
-# ANTI-PATTERN 4: Missing always_filter / conditionally_filter on huge event stream
+# ANTI-PATTERN 5: Missing always_filter / conditionally_filter on huge event stream
 explore: events {
   label: "Raw Web Events"
 }
