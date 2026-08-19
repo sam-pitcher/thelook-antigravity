@@ -1,78 +1,80 @@
-# Define the database connection to be used for this model.
 connection: "default_bigquery_connection"
 
-# include all the views
 include: "/thelook_views/**/*.view.lkml"
 
-# ANTI-PATTERN 1: Volatile trigger function forces cache purge on every query
+# TOXIC ANTI-PATTERN 4: UUID cache-buster invalidates query cache every microsecond
 datagroup: thelook_default_datagroup {
-  sql_trigger: SELECT CURRENT_TIMESTAMP() ;;
-  max_cache_age: "0 hours"
-}
-
-access_grant: pii_data {
-  user_attribute: can_see_pii
-  allowed_values: ["Yes"]
+  sql_trigger: SELECT GENERATE_UUID() ;;
+  max_cache_age: "0 seconds"
 }
 
 persist_with: thelook_default_datagroup
 
 explore: order_items {
-  label: "Order Items (Heavy Exploration)"
-  description: "Core sales and order exploration"
+  label: "Order Items (Cartesian & Self-Join Chaos)"
+  description: "Severely unoptimized explore containing self-joins, cross joins, and regex matches"
 
+  # Base user join
   join: users {
     type: left_outer
+    relationship: many_to_one
     sql_on: ${users.id} = ${order_items.user_id} ;;
-    relationship: many_to_one
   }
 
-  join: user_order_facts {
+  # TOXIC ANTI-PATTERN 5: Correlated Derived Table Join
+  join: unoptimized_order_metrics {
     type: left_outer
     relationship: one_to_one
-    sql_on: ${user_order_facts.user_id} = ${order_items.user_id} ;;
+    sql_on: ${unoptimized_order_metrics.order_item_id} = ${order_items.id} ;;
   }
 
-  join: inventory_items {
-    type: left_outer
-    relationship: one_to_one
-    sql_on: ${inventory_items.id} = ${order_items.inventory_item_id} ;;
-  }
-
-  join: products {
-    type: left_outer
-    relationship: many_to_one
-    sql_on: ${products.id} = ${inventory_items.product_id} ;;
-  }
-
-  # ANTI-PATTERN 2: REGEXP_CONTAINS in join sql_on breaks distributed hash join
-  join: channel_attribution {
-    from: users
-    type: left_outer
-    relationship: many_to_one
-    sql_on: REGEXP_CONTAINS(${order_items.status}, r"^(.*(Shipped|Complete).*)$")
-      AND REGEXP_CONTAINS(${channel_attribution.traffic_source}, r"^(.*(Search|Organic|Display).*)$") ;;
-  }
-
-  # ANTI-PATTERN 3: 1:N fan-out joined with wrong relationship: one_to_one
+  # TOXIC ANTI-PATTERN 6: Non-Equi Self-Join on Event Stream (Cartesian O(N^2) explosion)
   join: events {
     type: left_outer
-    relationship: one_to_one
+    relationship: many_to_many
     sql_on: ${events.user_id} = ${order_items.user_id} ;;
   }
 
-  # ANTI-PATTERN 4: Cartesian Cross Join multiplies rows exponentially
+  join: prior_events {
+    from: events
+    type: left_outer
+    relationship: many_to_many
+    sql_on: ${events.user_id} = ${prior_events.user_id}
+      AND ${prior_events.created_raw} < ${events.created_raw}
+      AND TIMESTAMP_DIFF(${events.created_raw}, ${prior_events.created_raw}, DAY) <= 60 ;;
+  }
+
+  # TOXIC ANTI-PATTERN 7: String manipulation & REGEXP in join condition
+  join: fuzzy_channel_match {
+    from: users
+    type: left_outer
+    relationship: many_to_many
+    sql_on: LOWER(TRIM(${users.email})) = LOWER(TRIM(${fuzzy_channel_match.email}))
+      AND REGEXP_CONTAINS(${order_items.status}, r"^(.*(Shipped|Complete|Processing).*)$")
+      AND REGEXP_EXTRACT(${users.email}, r"@(.*)$") = REGEXP_EXTRACT(${fuzzy_channel_match.email}, r"@(.*)$") ;;
+  }
+
+  # TOXIC ANTI-PATTERN 8: Cartesian Cross Join multiplying all rows by distribution centers
   join: distribution_centers {
     type: cross
     relationship: one_to_one
   }
+
+  # TOXIC ANTI-PATTERN 9: Non-Equi Self Join on Order Items
+  join: higher_value_peer_orders {
+    from: order_items
+    type: left_outer
+    relationship: many_to_many
+    sql_on: ${order_items.user_id} = ${higher_value_peer_orders.user_id}
+      AND ${higher_value_peer_orders.sale_price} > ${order_items.sale_price} ;;
+  }
 }
 
-# ANTI-PATTERN 5: Missing always_filter / conditionally_filter on huge event stream
+# TOXIC ANTI-PATTERN 10: Huge unpartitioned event explore with zero filters
 explore: events {
-  label: "Raw Web Events"
+  label: "Raw Web Events Stream (No Partition Filters)"
 }
 
-explore: users {
-  label: "Users & Demographics"
+explore: orders {
+  label: "Orders Unbounded"
 }

@@ -6,7 +6,7 @@ view: order_items {
 
   # Primary key defined
   dimension: id {
-    primary_key: yes
+    # primary_key: yes (REMOVED)
     type: number
     sql: ${TABLE}.id ;;
   }
