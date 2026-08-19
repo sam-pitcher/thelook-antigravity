@@ -8,12 +8,8 @@ include: "/thelook_views/**/*.view.lkml"
 # use the Quick Help panel on the right to see documentation.
 
 datagroup: thelook_default_datagroup {
-  # sql_trigger: SELECT MAX(id) FROM etl_log;;
+  sql_trigger: SELECT MAX(id) FROM `sampitcher-playground.the_look_ca.order_items_table` ;;
   max_cache_age: "1 hour"
-}
-
-datagroup: daily {
-  sql_trigger: SELECT my_changing_column ;;
 }
 
 access_grant: pii_data {

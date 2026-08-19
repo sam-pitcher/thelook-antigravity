@@ -1,7 +1,7 @@
 include: "common_fields.view"
 view: order_items {
   extends: [common_fields]
-  sql_table_name: `bigquery-public-data.thelook_ecommerce.order_items` ;;
+  sql_table_name: `sampitcher-playground.the_look_ca.order_items_table` ;;
 
   dimension_group: created {
     type: time

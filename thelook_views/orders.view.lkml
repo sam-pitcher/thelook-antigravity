@@ -2,7 +2,7 @@
 view: orders {
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
-  sql_table_name: `bigquery-public-data.thelook_ecommerce.order_item.orders` ;;
+  sql_table_name: `sampitcher-playground.the_look_ca.orders_table` ;;
 
   # No primary key is defined for this view. In order to join this view in an Explore,
   # define primary_key: yes on a dimension that has no repeated values.
@@ -36,6 +36,7 @@ view: orders {
   }
 
   dimension: order_id {
+    primary_key: yes
     type: number
     sql: ${TABLE}.order_id ;;
   }

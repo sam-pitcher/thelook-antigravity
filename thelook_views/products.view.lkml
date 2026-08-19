@@ -2,7 +2,7 @@
 view: products {
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
-  sql_table_name: `bigquery-public-data.thelook_ecommerce.products` ;;
+  sql_table_name: `sampitcher-playground.the_look_ca.products_table` ;;
 
   # No primary key is defined for this view. In order to join this view in an Explore,
   # define primary_key: yes on a dimension that has no repeated values.
@@ -14,16 +14,19 @@ view: products {
   dimension: brand {
     type: string
     sql: ${TABLE}.brand ;;
+    label: "Brand"
   }
 
   dimension: category {
     type: string
     sql: ${TABLE}.category ;;
+    label: "Category"
   }
 
   dimension: cost {
     type: number
     sql: ${TABLE}.cost ;;
+    label: "Cost"
   }
 
   dimension: department {
@@ -37,6 +40,7 @@ view: products {
   }
 
   dimension: id {
+    primary_key: yes
     type: number
     sql: ${TABLE}.id ;;
   }

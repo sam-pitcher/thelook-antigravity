@@ -1,0 +1,10 @@
+{
+    "looker.instanceURL": "https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app",
+    "looker.clientId": "R48m9nDSrkYMhTFTFj4n",
+    "looker.clientSecret": "bxM9QH9Myh3w3dXvRrQTW6QT",
+    "looker.projectId": "thelook-antigravity",
+    "looker.acceptSelfSignedCertificates": true,
+    "files.associations": {
+        "*.lkml": "lookml"
+    }
+}
