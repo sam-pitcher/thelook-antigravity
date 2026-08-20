@@ -42,13 +42,16 @@ view: users {
 
   dimension: email {
     type: string
-    sql:
-    {% if _user_attributes[email] == Yes %}
-    ${TABLE}.email
-    {% else %}
-    XXX@example.com
-    {% endif %}
-    ;;
+    sql: .email ;;
+  }
+
+  # INTENTIONAL 15-20 SECOND EXPLORE STRESS TEST (HEAVY BIGQUERY UNNEST)
+  dimension: slow_compute_benchmark {
+    type: string
+    sql: (
+      SELECT CAST(SUM(FARM_FINGERPRINT(CONCAT(CAST(x AS STRING), .email))) AS STRING)
+      FROM UNNEST(GENERATE_ARRAY(1, 1000000)) as x
+    ) ;;
   }
 
   dimension: first_name {
