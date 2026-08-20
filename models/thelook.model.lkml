@@ -1,6 +1,7 @@
 connection: "default_bigquery_connection"
 
 include: "/thelook_views/**/*.view.lkml"
+include: "/dashboards/**/*.dashboard.lookml"
 
 # TOXIC ANTI-PATTERN 4: UUID cache-buster invalidates query cache every microsecond
 datagroup: thelook_default_datagroup {
