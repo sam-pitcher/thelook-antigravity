@@ -8,6 +8,7 @@
 include: "/thelook_views/**/*.view.lkml"
 
 explore: order_items {
+  hidden: yes
   label: "Order Items"
   description: "Core sales and order item performance explore (Hub Governed)"
 
@@ -43,6 +44,7 @@ explore: order_items {
 }
 
 explore: orders {
+  hidden: yes
   label: "Orders"
   description: "Order-level analysis explore (Hub Governed)"
 
@@ -60,6 +62,7 @@ explore: orders {
 }
 
 explore: users {
+  hidden: yes
   label: "Users"
   description: "User customer lifetime facts and demographics (Hub Governed)"
 

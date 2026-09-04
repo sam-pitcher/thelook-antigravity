@@ -16,3 +16,15 @@ access_grant: pii_data {
 
 persist_with: thelook_default_datagroup
 
+# Unhide official company-wide baseline explores
+explore: +order_items {
+  hidden: no
+}
+
+explore: +users {
+  hidden: no
+}
+
+explore: +orders {
+  hidden: no
+}
