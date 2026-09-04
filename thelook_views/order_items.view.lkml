@@ -4,16 +4,15 @@ view: order_items {
   extends: [common_fields]
   sql_table_name: `sampitcher-playground.the_look_ca.order_items_table` ;;
 
-  # Primary key defined
   dimension: id {
-    # primary_key: yes (REMOVED)
+    primary_key: yes
     type: number
     sql: ${TABLE}.id ;;
   }
 
   dimension_group: created {
     type: time
-    timeframes: [raw, time, date, week, month, year]
+    timeframes: [raw, time, date, week, month, quarter, year]
     sql: ${TABLE}.created_at ;;
   }
 
@@ -63,9 +62,9 @@ view: order_items {
   dimension: sale_price {
     type: number
     sql: ${TABLE}.sale_price ;;
+    value_format_name: usd
   }
 
-  # ANTI-PATTERN 8: Table calculation-like un-aggregated field exposed as a measure
   measure: total_sale_price {
     type: sum
     sql: ${sale_price} ;;
@@ -80,5 +79,6 @@ view: order_items {
 
   measure: count {
     type: count
+    drill_fields: [id, order_id, user_id, status, sale_price, created_date]
   }
 }

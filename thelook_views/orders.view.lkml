@@ -1,8 +1,8 @@
 view: orders {
   sql_table_name: `sampitcher-playground.the_look_ca.orders_table` ;;
 
-  # ANTI-PATTERN 6: Primary key removed from orders view
   dimension: order_id {
+    primary_key: yes
     type: number
     sql: ${TABLE}.order_id ;;
   }
@@ -10,8 +10,6 @@ view: orders {
   dimension_group: created {
     type: time
     timeframes: [raw, time, date, week, month, quarter, year]
-    # ANTI-PATTERN 7: convert_tz: yes on BigQuery timestamp breaks partition pruning
-    convert_tz: yes
     sql: ${TABLE}.created_at ;;
   }
 
@@ -19,6 +17,18 @@ view: orders {
     type: time
     timeframes: [raw, time, date, week, month, quarter, year]
     sql: ${TABLE}.delivered_at ;;
+  }
+
+  dimension_group: returned {
+    type: time
+    timeframes: [raw, time, date, week, month, quarter, year]
+    sql: ${TABLE}.returned_at ;;
+  }
+
+  dimension_group: shipped {
+    type: time
+    timeframes: [raw, time, date, week, month, quarter, year]
+    sql: ${TABLE}.shipped_at ;;
   }
 
   dimension: gender {
@@ -43,5 +53,6 @@ view: orders {
 
   measure: count {
     type: count
+    drill_fields: [order_id, user_id, status, created_date]
   }
 }

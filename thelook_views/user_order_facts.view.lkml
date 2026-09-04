@@ -1,6 +1,5 @@
 view: user_order_facts {
   derived_table: {
-    # ANTI-PATTERN: ORDER BY in derived table subquery + non-persisted full table scan
     sql: SELECT 
            user_id,
            COUNT(*) as lifetime_orders,
@@ -8,8 +7,9 @@ view: user_order_facts {
            AVG(sale_price) as avg_order_value,
            STRING_AGG(DISTINCT status, ", ") as order_statuses
          FROM `sampitcher-playground.the_look_ca.order_items_table`
-         GROUP BY 1
-         ORDER BY lifetime_revenue DESC ;;
+         GROUP BY 1 ;;
+    datagroup_trigger: thelook_default_datagroup
+    cluster_keys: ["user_id"]
   }
 
   dimension: user_id {
@@ -18,14 +18,41 @@ view: user_order_facts {
     sql: ${TABLE}.user_id ;;
   }
 
-  # ANTI-PATTERN: Measure defined on raw string dimension aggregation
-  dimension: lifetime_revenue_dim {
+  dimension: lifetime_orders {
+    type: number
+    sql: ${TABLE}.lifetime_orders ;;
+  }
+
+  dimension: lifetime_revenue {
     type: number
     sql: ${TABLE}.lifetime_revenue ;;
+    value_format_name: usd
+  }
+
+  dimension: avg_order_value {
+    type: number
+    sql: ${TABLE}.avg_order_value ;;
+    value_format_name: usd
+  }
+
+  dimension: order_statuses {
+    type: string
+    sql: ${TABLE}.order_statuses ;;
   }
 
   measure: total_lifetime_revenue {
     type: sum
-    sql: ${lifetime_revenue_dim} ;;
+    sql: ${lifetime_revenue} ;;
+    value_format_name: usd
+  }
+
+  measure: average_lifetime_revenue {
+    type: average
+    sql: ${lifetime_revenue} ;;
+    value_format_name: usd
+  }
+
+  measure: count {
+    type: count
   }
 }

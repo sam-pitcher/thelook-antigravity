@@ -4,21 +4,20 @@ view: users {
   extends: [common_fields]
   sql_table_name: `sampitcher-playground.the_look_ca.users_table` ;;
 
-  # ANTI-PATTERN 5: Primary key omitted - triggers Symmetric Aggregates & inaccurate distinct hashes
   dimension: id {
+    primary_key: yes
     type: number
     sql: ${TABLE}.id ;;
   }
 
-  # ANTI-PATTERN 6: ALL_CAPS naming with no description
-  dimension: USER_AGE {
+  dimension: age {
     type: number
     sql: ${TABLE}.age ;;
   }
 
   dimension: age_tier {
     type: tier
-    sql: ${USER_AGE} ;;
+    sql: ${age} ;;
     tiers: [0, 10, 30, 60]
     style: integer
   }
@@ -45,15 +44,6 @@ view: users {
     sql: ${TABLE}.email ;;
   }
 
-  # INTENTIONAL 15-20 SECOND EXPLORE STRESS TEST (HEAVY BIGQUERY UNNEST)
-  dimension: slow_compute_benchmark {
-    type: string
-    sql: (
-      SELECT CAST(SUM(FARM_FINGERPRINT(CONCAT(CAST(x AS STRING), ${TABLE}.email))) AS STRING)
-      FROM UNNEST(GENERATE_ARRAY(1, 1000000)) as x
-    ) ;;
-  }
-
   dimension: first_name {
     type: string
     sql: ${TABLE}.first_name ;;
@@ -64,8 +54,7 @@ view: users {
     sql: ${TABLE}.last_name ;;
   }
 
-  # ANTI-PATTERN 7: PascalCase naming
-  dimension: FullCustomerName {
+  dimension: full_name {
     type: string
     sql: CONCAT(${first_name}, " ", ${last_name}) ;;
   }
@@ -112,6 +101,6 @@ view: users {
 
   measure: count {
     type: count
-    drill_fields: [last_name, first_name]
+    drill_fields: [id, full_name, email, city, state, country]
   }
 }
