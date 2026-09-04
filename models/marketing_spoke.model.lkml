@@ -14,6 +14,12 @@ include: "/explores/thelook_hub.explore.lkml"
 include: "/spoke_views/marketing_users_rfn.view.lkml"
 include: "/spoke_views/marketing_users_ext.view.lkml"
 
+# Default datagroup required by central PDTs (user_order_facts)
+datagroup: thelook_default_datagroup {
+  sql_trigger: SELECT MAX(id) FROM `sampitcher-playground.the_look_ca.order_items_table` ;;
+  max_cache_age: "4 hours"
+}
+
 datagroup: marketing_daily_datagroup {
   sql_trigger: SELECT MAX(id) FROM `sampitcher-playground.the_look_ca.order_items_table` ;;
   max_cache_age: "2 hours"
@@ -37,10 +43,9 @@ explore: +users {
   group_label: "Marketing Spoke"
 }
 
-# 4. Extended Custom Departmental Explore (Demonstrating Extends pattern)
+# 4. Extended Custom Departmental Explore (Extends Pattern)
 explore: marketing_campaign_cohorts {
-  extends: [users]
-  from: marketing_users_ext
+  view_name: marketing_users_ext
   label: "Marketing: Cohort Performance Analysis"
   group_label: "Marketing Spoke"
 }
