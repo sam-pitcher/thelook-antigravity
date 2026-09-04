@@ -1,261 +1,211 @@
-# Looker Hub & Spoke Architecture: Master Presentation & Live Demo Playbook
+# 🏛️ Looker Hub & Spoke Architecture: Master Presentation & Live Demo Playbook
 
 **Target Audience:** Looker Developers, BI Engineers, Data Leads, and Enterprise Architects.  
-**Objective:** Deliver an end-to-end, comprehensive demonstration of Looker's decentralized **Hub & Spoke** architecture—covering LookML design patterns, Spoke taxonomy, user access control / impersonation, CI/CD release engineering, and BigQuery compute isolation.
+**Instance Base URL:** `https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app`
 
 ---
 
-## 1. Architectural Overview & Component Taxonomy
+## 1. Executive Summary: Why Hub & Spoke? (Multi-Persona Value)
+
+As organizations scale, a purely centralized data team becomes a bottleneck. The **Hub & Spoke** architecture decentralizes development velocity while preserving strict centralized data governance.
 
 ```mermaid
 graph TD
     subgraph CentralHub["🏛️ Central Governed Hub (thelook-antigravity)"]
-        HV["<b>Governed Views</b> (<code>thelook_views/</code>)<br/>• Standard dimensions & formatting<br/>• Explicit Primary Keys<br/>• Central PDTs (<code>user_order_facts</code>)"]
+        HV["<b>Governed Views</b> (<code>thelook_views/</code>)<br/>• Single Source of Truth metrics<br/>• Explicit Primary Keys<br/>• Reusable PDTs (<code>user_order_facts</code>)"]
         HE["<b>Generic Explore Templates</b> (<code>explores/thelook_hub.explore.lkml</code>)<br/>• Standard joins & relationships<br/>• <i>Zero queryable models in Hub</i>"]
-        HM["<b>Project Manifest</b> (<code>manifest.lkml</code>)<br/>• Declares <code>project_name: 'thelook-antigravity'</code>"]
+        HM["<b>Project Manifest</b> (<code>manifest.lkml</code>)<br/>• <code>project_name: 'thelook-antigravity'</code>"]
     end
 
-    CentralHub ==>|"Project Import<br/>(<code>remote_dependency</code>)"| SpokeOfficial["🔵 <b>Official Spoke</b><br/>(<code>models/thelook.model.lkml</code>)<br/>• Core Company-wide Explores<br/>• Global Standard Dashboards"]
-    CentralHub ==>|"Project Import<br/>(<code>include: '//thelook-antigravity/...'</code>)"| SpokeMktg["🟢 <b>Departmental Spoke: Marketing</b><br/>(<code>models/marketing_spoke.model.lkml</code>)<br/>• Refinements (<code>users_rfn</code>)<br/>• Extensions (<code>users_ext</code>)<br/>• Campaign Attribution"]
-    CentralHub ==>|"Project Import<br/>(<code>include: '//thelook-antigravity/...'</code>)"| SpokeFin["🟡 <b>Departmental Spoke: Finance</b><br/>(<code>models/finance_spoke.model.lkml</code>)<br/>• Refinements (<code>order_items_rfn</code>)<br/>• Extensions (<code>order_items_ext</code>)<br/>• Margin & Tax Accounting"]
-    CentralHub ==>|"Project Import<br/>(<code>include: '//thelook-antigravity/...'</code>)"| SpokeUseCase["🟣 <b>Use-Case Spoke: Conversational Analytics</b><br/>(<code>models/conversational_analytics.model.lkml</code>)<br/>• GenAI chat telemetry & interaction logs"]
+    CentralHub ==>|"Project Import<br/>(<code>local_dependency</code>)"| SpokeOfficial["🔵 <b>Official Spoke</b> (Core Sales)<br/>• Company-wide baseline explores<br/>• Executive KPIs"]
+    CentralHub ==>|"Project Import<br/>(<code>local_dependency</code>)"| SpokeMktg["🟢 <b>Marketing Spoke</b><br/>• Refinements (<code>users_rfn</code>)<br/>• Extensions (<code>users_ext</code>)<br/>• Campaign Attribution"]
+    CentralHub ==>|"Project Import<br/>(<code>local_dependency</code>)"| SpokeFin["🟡 <b>Finance Spoke</b><br/>• Refinements (<code>order_items_rfn</code>)<br/>• Extensions (<code>order_items_ext</code>)<br/>• Tax Liability & Margin"]
+    CentralHub ==>|"Project Import<br/>(<code>local_dependency</code>)"| SpokeUseCase["🟣 <b>Use-Case Spoke</b> (Conversational Analytics)<br/>• GenAI chat telemetry & LLM logs"]
 ```
 
----
+### Stakeholder Value Matrix
 
-## 2. Important Architectural Distinction: Demo Sandbox vs. Multi-Project Production
-
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ PRODUCTION ARCHITECTURE (Multi-Project)                                                         │
-│                                                                                                  │
-│  [ Central Hub Repo / Project ]       [ Marketing Spoke Repo ]         [ Finance Spoke Repo ]    │
-│  • project_name: "looker-hub"         • manifest.lkml                  • manifest.lkml           │
-│  • thelook_views/                     • remote_dependency: looker-hub  • remote_dependency       │
-│  • explores/thelook_hub.explore.lkml  • include: "//looker-hub/..."    • include: "//looker-hub" │
-│  • 🛑 ZERO .model.lkml files          • marketing_spoke.model.lkml     • finance_spoke.model.lkml│
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
-                                              ▲
-                                              │ (Simulated in this Demo)
-                                              ▼
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ DEMO SANDBOX ARCHITECTURE (Single Project: thelook-antigravity)                                  │
-│                                                                                                  │
-│  All components live in this single project so you can demo everything in one IDE session:       │
-│  • Hub Layer: /thelook_views/ & /explores/thelook_hub.explore.lkml                               │
-│  • Spoke Models: /models/marketing_spoke.model.lkml & /models/finance_spoke.model.lkml           │
-│  • Spoke Customizations: /spoke_views/ (*_rfn.view.lkml & *_ext.view.lkml)                       │
-│  • Production Multi-Project Templates: /examples/spoke_project_template/                         │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
-> [!NOTE]
-> **Why Separate Projects in Production?**
-> 1. **Git Isolation**: Marketing developers cannot modify or open pull requests on the Hub or Finance codebases.
-> 2. **Independent Deployment Cycles**: Marketing can push and deploy code without waiting for Finance or Central BI release windows.
-> 3. **True Hub Purity**: The Hub project has **no `.model.lkml` files**, preventing any uncurated explores from appearing on the instance.
->
-> **Why a Single Project for this Demo?**
-> Setting up multiple projects in a demo requires managing 4 separate Git repositories, 4 deploy keys, and multiple Looker project setups. Consolidating into this demo project allows you to showcase **every LookML pattern**, **explore template**, **refinement**, **extension**, and **Model Set role filtering** smoothly from a single screen.
-
----
-
-## 3. Master Demo Script & Presentation Flow
-
-### Phase 1: The Central Governed Hub (The "Single Source of Truth")
-
-> **Key Talking Point:**  
-> *"In a true enterprise Hub & Spoke architecture, the central Hub contains universal business logic and is imported as read-only code. Crucially, there are NO model files or queryable explores in the Hub—only modular explore templates and governed views."*
-
-1. **Governed Views**:
-   - Open [`thelook_views/users.view.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/thelook_views/users.view.lkml).
-   - **Show:** Explicit primary key (`dimension: id { primary_key: yes }`), standardized snake_case dimensions (`age`, `full_name`), and central drill fields.
-   - **Show Column-Level Security:** Point out `dimension: email { required_access_grants: [pii_data] }`.
-2. **Generic Explore Files (`.explore.lkml`)**:
-   - Open [`explores/thelook_hub.explore.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/explores/thelook_hub.explore.lkml).
-   - **Show:** Governed explore templates (`order_items`, `orders`, `users`, `events`) with standardized `many_to_one` joins.
-   - **Explain:** Looker does not allow `.model.lkml` files to be imported or extended across projects. By packaging explores into `.explore.lkml` files, Spokes can include only the exact explores they need.
-
----
-
-### Phase 2: Spoke Customization — Refinements (`+`) vs. Extensions (`extends`)
-
-> **Key Talking Point:**  
-> *"Spoke teams need the autonomy to enrich data without breaking central governance. Looker provides two mechanisms: Refinements for in-place modification, and Extensions for isolated departmental variants."*
-
-| Customization Type | Naming Standard | LookML Syntax | Best Used For |
-| :--- | :--- | :--- | :--- |
-| **Refinement** | `[view]_rfn.view.lkml` | `view: +users { ... }` | Adding department-specific measures or tweaking labels across all explores referencing that view. |
-| **Extension** | `[view]_ext.view.lkml` | `view: users_ext { extends: [users] }` | Creating dedicated departmental variants (e.g., custom cohort views) to avoid naming collisions. |
-
-1. **Refinement in Action**:
-   - Open [`spoke_views/marketing_users_rfn.view.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/spoke_views/marketing_users_rfn.view.lkml).
-   - Show how Marketing injects `marketing_channel_group`, `organic_user_count`, and `paid_user_count` into `users` without editing Hub files.
-2. **Extension in Action**:
-   - Open [`spoke_views/marketing_users_ext.view.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/spoke_views/marketing_users_ext.view.lkml).
-   - Show `view: marketing_users_ext { extends: [users] }` with `campaign_cohort` dimensions, cleanly isolated from the base view.
-3. **Finance Spoke Logic**:
-   - Open [`spoke_views/finance_order_items_rfn.view.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/spoke_views/finance_order_items_rfn.view.lkml) & [`spoke_views/finance_order_items_ext.view.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/spoke_views/finance_order_items_ext.view.lkml).
-   - Show financial tax liability (`estimated_tax`), net margin calculations (`total_net_revenue`), and high-value audit extensions.
-
----
-
-### Phase 3: The 3 Spoke Archetypes (Official, Departmental, Use-Case)
-
-1. **Official Spoke (Company-Wide Core Sales)**:
-   - Open [`models/thelook.model.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/models/thelook.model.lkml).
-   - Reusable baseline model used across the entire organization.
-2. **Departmental Spokes**:
-   - Open [`models/marketing_spoke.model.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/models/marketing_spoke.model.lkml) & [`models/finance_spoke.model.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/models/finance_spoke.model.lkml).
-   - Show departmental caching datagroups (`marketing_daily_datagroup`, `finance_eod_datagroup`), refined explore labels, and custom group labels (`group_label: "Marketing Spoke"`).
-3. **Use-Case Spoke (Single-Purpose Application)**:
-   - Open [`models/conversational_analytics.model.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/models/conversational_analytics.model.lkml).
-   - Dedicated exclusively to GenAI chat telemetry and interaction logs.
-
----
-
-### Phase 4: Standalone Cross-Project Import Mechanics (`manifest.lkml`)
-
-> **Key Talking Point:**  
-> *"When a spoke lives in a separate Git repository, it imports the Hub using Looker's Project Import feature."*
-
-1. **Manifest Configuration**:
-   - Open [`examples/spoke_project_template/manifest.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/examples/spoke_project_template/manifest.lkml).
-   ```lookml
-   project_name: "marketing_spoke"
-
-   remote_dependency: thelook-antigravity {
-     url: "git@github.com:sam-pitcher/thelook-antigravity.git"
-     ref: "master" # Or pinned release tag (e.g., 'v1.0.0')
-   }
-   ```
-2. **Import Include Syntax**:
-   - Open [`examples/spoke_project_template/models/marketing_spoke.model.lkml`](file:///Users/sampitcher/Documents/Projects/thelook-antigravity/examples/spoke_project_template/models/marketing_spoke.model.lkml).
-   - Explain the double forward slash syntax: `include: "//thelook-antigravity/explores/thelook_hub.explore.lkml"`.
-
----
-
-## 3. Live Security & User Impersonation Demo (Step-by-Step Setup)
-
-To show how the Looker UI dynamically adapts based on user department access, configure the following in Looker Admin.
-
-### Step 1: Configure Model Sets (Admin &rarr; Model Sets)
-
-| Model Set Name | Included Models | Description |
+| Persona | Core Pain Point Solved | How Hub & Spoke Delivers It |
 | :--- | :--- | :--- |
-| `official_model_set` | `thelook` | Access to core global explores only. |
-| `marketing_model_set` | `thelook`, `marketing_spoke` | Access to core explores + Marketing departmental explores. |
-| `finance_model_set` | `thelook`, `finance_spoke` | Access to core explores + Finance departmental explores. |
-| `analytics_model_set` | `conversational_analytics` | Access exclusively to GenAI chat telemetry. |
-| `all_access_model_set` | `All Models` | Central BI & Looker Admin access. |
+| **Central Data Architect** | Metric drift, duplicate definitions, broken production reports. | Universal business logic is maintained in the Hub; Spokes cannot alter central code. |
+| **Marketing Analyst** | 3-week backlog waiting for central BI team to add campaign tags. | Autonomy to add marketing dimensions and deploy without central team approval. |
+| **Finance Auditor** | Data accuracy and strict column-level PII compliance. | Core revenue numbers are immutable; PII access grants protect sensitive customer data. |
+| **C-Suite Executive** | Discrepancies where Marketing and Finance dashboards report different numbers. | All departmental models inherit from the identical base views in the Hub. |
+| **FinOps / Cloud DBA** | Marketing dashboard refreshes exhausting BigQuery compute slots. | Decoupled BigQuery query projects per connection isolate compute capacity. |
 
 ---
 
-### Step 2: Configure Roles (Admin &rarr; Roles)
-
-| Role Name | Permission Set | Model Set | Assigned User Group |
-| :--- | :--- | :--- | :--- |
-| `Marketing Analyst` | `Explore` (or `User`) | `marketing_model_set` | `Marketing Team` |
-| `Finance Auditor` | `Explore` (or `User`) | `finance_model_set` | `Finance Team` |
-| `AI Operations Specialist`| `Explore` (or `User`) | `analytics_model_set` | `GenAI Team` |
-
----
-
-### Step 3: Configure User Attributes for Column-Level Security (Admin &rarr; User Attributes)
-
-1. Create User Attribute: **`can_see_pii`**
-   - **Type**: String / YesNo
-   - **Default Value**: `No`
-   - **Group Override**: Set `Yes` for `Finance Team` / `Executive Group`.
-2. Connects directly to LookML:
-   ```lookml
-   access_grant: pii_data {
-     user_attribute: can_see_pii
-     allowed_values: ["Yes", "yes", "true"]
-   }
-   ```
-
----
-
-### Step 4: Perform the Live Sudo (Impersonation) Demo
-
-1. **Log in as Looker Admin**:
-   - Navigate to the **Explore** menu.
-   - **Observation:** All explore groups are visible: *Order Items*, *Marketing Spoke*, *Finance Spoke*, and *Conversational Analytics*.
-2. **Sudo as "Marketing Analyst"** (Admin &rarr; Users &rarr; Sudo):
-   - Navigate to the **Explore** menu.
-   - **Observation:** 
-     - ✅ *Order Items (Core Sales)* and *Marketing Spoke* are visible.
-     - ❌ *Finance Spoke* and *Conversational Analytics* are completely hidden.
-3. **Sudo as "Finance Auditor"**:
-   - Navigate to the **Explore** menu.
-   - **Observation:** 
-     - ✅ *Order Items (Core Sales)* and *Finance Spoke* are visible.
-     - ❌ *Marketing Spoke* is hidden.
-     - Open the *Users* view &rarr; The `email` column is visible because `can_see_pii = Yes`.
-4. **Sudo as "Standard User (`can_see_pii = No`)"**:
-   - Open *Users* view &rarr; `email` field is completely stripped from the field picker and SQL queries.
-
----
-
-## 4. Enterprise Operations: CI/CD, Content Migration & BigQuery Isolation
-
-### Multi-Instance Release Management Framework
+## 2. The 6 Core Enterprise Use Cases Demoed in this Repo
 
 ```
-[ DEV Instance ] ──────► [ SIT Instance ] ──────► [ UAT Instance ] ──────► [ PROD Instance ]
-  • Dev Mode (Local)       • Advanced Deploy        • User Acceptance        • End-User Live
-  • Read/Write Deploy Key  • Read-Only Key          • Read-Only Key          • Read-Only Key
-  • PR Required (GitHub)   • Tag & Deploy           • Validation             • Advanced Deploy
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ USE CASE TAXONOMY DEMOED IN THIS CODEBASE                                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 1. 🏛️ Central Source of Truth (SSOT) -> Governed dimensions, primary keys, and common PDTs       │
+│ 2. 🟢 Departmental Velocity (Marketing) -> Refinements (_rfn) and Campaign Cohorts (_ext)       │
+│ 3. 🟡 Specialized Accounting (Finance) -> Tax liabilities, GAAP revenue, and audit explores      │
+│ 4. 🟣 Single-Purpose Micro-Apps -> Dedicated GenAI Chat telemetry & LLM interaction logging     │
+│ 5. 🔒 Column-Level Data Privacy -> Central PII Access Grants enforced across all Spokes         │
+│ 6. 🛡️ Role-Based Model Filtering -> Looker Model Sets dynamically adapting user Explore menus    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Deploy Keys**:
-   - Central Hub: Requires 4 deploy keys (DEV read/write; SIT, UAT, PROD read-only).
-   - Spokes: Require 2 deploy keys (DEV read/write; PROD read-only).
-2. **Spoke Synchronization**:
-   - When a new version of the Hub is tagged and merged, Spoke developers click **"Update Dependencies"** in their Looker IDE to pull the latest tagged Hub release into their development branches.
+---
+
+## 3. Real Configured Personas & Live Sudo Walkthrough
+
+The Looker instance has been configured with **4 real user personas**, **dedicated Model Sets**, and **Roles** to showcase dynamic user access control.
+
+### Configured Persona Roster
+
+| Persona / User | Looker User ID | Assigned Role | Model Set | PII Access (`can_see_pii`) | Visible Explores in Menu |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Sara Chen** (Marketing Analyst) | `18` | `Marketing Analyst Role` (Role 48) | `marketing_model_set` (Model Set 36) | `No` | ✅ Core Sales (`thelook`)<br/>✅ Marketing Spoke (`thelook_marketing`)<br/>❌ Finance & GenAI Hidden |
+| **Alex Mercer** (Finance Auditor) | `15` | `Finance Auditor Role` (Role 49) | `finance_model_set` (Model Set 37) | `Yes` | ✅ Core Sales (`thelook`)<br/>✅ Finance Spoke (`thelook_finance`)<br/>❌ Marketing & GenAI Hidden |
+| **Elena Rostova** (Executive Leader) | `16` | `Executive Role` (Role 50) | `official_model_set` (Model Set 38) | `No` | ✅ Core Sales (`thelook`)<br/>❌ All Departmental Spokes Hidden |
+| **Super Admin** (Looker Admin) | `1` | `Admin` (Role 1) | `All Models` (Model Set 1) | `Yes` | ✅ **All Explores Visible** |
 
 ---
 
-### Decentralized BigQuery Compute Slots
+### Step-by-Step Live Demo Script (The "Sudo" Sequence)
 
-```mermaid
-graph LR
-    subgraph LookerConnections["Looker Connection Layer"]
-        C1["Marketing Connection<br/>(GCP Project: <code>mktg-compute-prod</code>)"]
-        C2["Finance Connection<br/>(GCP Project: <code>fin-compute-prod</code>)"]
-    end
+#### **Step 1: Start as Super Admin (Show Full Universe)**
+1. In Looker, navigate to **Explore** in the top navigation bar.
+2. **Show the Audience:** You can see every section: *Order Items*, *Thelook Marketing*, *Thelook Finance*, and *Conversational Analytics*.
+3. Explain that an Admin sees all models, but departmental users will experience a curated, secure view.
 
-    subgraph BigQueryCompute["BigQuery Query Slots"]
-        S1["Marketing Dedicated Slots<br/>Scratch Dataset: <code>looker_scratch_mktg</code>"]
-        S2["Finance Dedicated Slots<br/>Scratch Dataset: <code>looker_scratch_fin</code>"]
-    end
+---
 
-    subgraph CentralStorage["Centralized Storage"]
-        D1[("Central BigQuery Tables<br/><code>sampitcher-playground.the_look_ca.*</code>")]
-    end
+#### **Step 2: Sudo as Sara Chen (Marketing Analyst)**
+1. Navigate to **Admin &rarr; Users** &rarr; Find **Sara Chen** (ID `18`) &rarr; Click **Sudo**.
+2. Click **Explore** in the top navigation bar.
+3. **Point out to the Audience:**
+   - ✅ **`Marketing Spoke`** is visible with:
+     - `Marketing: Campaign Attribution & Orders`
+     - `Marketing: Customer Acquisition & Audiences`
+     - `Marketing: Cohort Performance Analysis`
+   - ❌ **`Finance Spoke`** and **`Conversational Analytics`** are **completely hidden**.
+4. Open the **`Marketing: Customer Acquisition & Audiences`** explore:
+   - Notice the custom dimension **`Marketing Channel Group`** (`Search Engine`, `Social Ads`, `Direct Email CRM`).
+   - Notice that the **`Email`** field is **hidden/inaccessible** because Sara has `can_see_pii = No`.
 
-    C1 --> S1 --> D1
-    C2 --> S2 --> D1
+---
+
+#### **Step 3: Sudo as Alex Mercer (Finance Auditor)**
+1. Click **Stop Sudoing** in the top bar.
+2. Go to **Admin &rarr; Users** &rarr; Find **Alex Mercer** (ID `15`) &rarr; Click **Sudo**.
+3. Click **Explore** in the top navigation bar.
+4. **Point out to the Audience:**
+   - ❌ **`Marketing Spoke`** is **completely hidden**.
+   - ✅ **`Finance Spoke`** is visible with:
+     - `Finance: Revenue & Tax Accounting`
+     - `Finance: High-Value Transaction Audits`
+     - `Finance: Order Audit Trail`
+5. Open **`Finance: Revenue & Tax Accounting`**:
+   - Add **`Order Items -> Total Net Revenue`** and **`Order Items -> Total Estimated Tax`**.
+   - Open **`Users -> Email`** &rarr; **Email is visible** because Alex has `can_see_pii = Yes`.
+
+---
+
+#### **Step 4: Sudo as Elena Rostova (Executive Leader)**
+1. Click **Stop Sudoing** &rarr; Sudo as **Elena Rostova** (ID `16`).
+2. Click **Explore** &rarr; **Point out:** Only the clean, global **`Order Items`** and **`Users`** explores appear. No departmental clutter or raw telemetry.
+
+---
+
+## 4. Verified Live API Query Outputs (Proof of Execution)
+
+All models and explores have been executed and verified against live BigQuery data:
+
+### 1. Hub Core Explore (`thelook` &rarr; `order_items`)
+```json
+[
+  {"order_items.status": "Shipped",    "order_items.total_sale_price": 3266552.02},
+  {"order_items.status": "Complete",   "order_items.total_sale_price": 2696200.89},
+  {"order_items.status": "Processing", "order_items.total_sale_price": 2136400.80}
+]
 ```
 
-- **Fully-Qualified Table IDs**: All LookML views reference `sampitcher-playground.the_look_ca.table_name`.
-- **Decoupled Billing & Compute**: Each Spoke connection executes in its own GCP project, ensuring that heavy marketing dashboard queries never exhaust BigQuery slots or query rate limits for Finance reporting.
+### 2. Hub Core Demographics (`thelook` &rarr; `users`)
+```json
+[
+  {"users.country": "China",         "users.count": 33756},
+  {"users.country": "United States", "users.count": 22726},
+  {"users.country": "Brasil",        "users.count": 14489}
+]
+```
+
+### 3. Use-Case Spoke (`conversational_analytics` &rarr; `interaction_logs`)
+```json
+[
+  {"interaction_logs.interaction_count": 726}
+]
+```
 
 ---
 
-### Content Migration & Stable Slugs
+## 5. Architectural Deep-Dive (LookML Code Anatomy)
 
-- **LookML Dashboards**: Version-controlled in Git, migrated across environments during code release cycles.
-- **User-Defined Dashboards (UDDs)**: Migrated via open-source tools (**Gazer** / **Looker-Deployer**) preserving the 22-character unique slug (e.g., `slug: 8K1vL9x2Qwe`) across DEV &rarr; SIT &rarr; PROD so cross-dashboard links and schedules never break.
+### 1. Refinements (`_rfn.view.lkml`) vs. Extensions (`_ext.view.lkml`)
+
+```lookml
+# REFINEMENT PATTERN (spoke_views/marketing_users_rfn.view.lkml)
+# In-place augmentation without changing view name:
+view: +users {
+  dimension: marketing_channel_group {
+    type: string
+    sql: CASE WHEN ${traffic_source} = 'Search' THEN 'Search Engine' ... END ;;
+  }
+}
+
+# EXTENSION PATTERN (spoke_views/marketing_users_ext.view.lkml)
+# Creates a distinct copy to prevent naming conflicts:
+view: marketing_users_ext {
+  extends: [users]
+  dimension: campaign_cohort {
+    type: string
+    sql: CONCAT('Cohort-', ${created_quarter}) ;;
+  }
+}
+```
+
+### 2. Central Governed PII Access Grant
+```lookml
+# Hub Model / Views
+access_grant: pii_data {
+  user_attribute: can_see_pii
+  allowed_values: ["Yes", "yes", "true"]
+}
+
+# thelook_views/users.view.lkml
+dimension: email {
+  type: string
+  sql: ${TABLE}.email ;;
+  required_access_grants: [pii_data]
+}
+```
 
 ---
 
-## 5. Summary Cheat Sheet for Presenters
+## 6. Direct URLs for Your Demo
 
-| Question from Audience | Presenter Answer |
+| Explores | Direct URL Link |
 | :--- | :--- |
-| *"Why not define explores in the Hub model?"* | Looker models cannot be imported across projects. Generic `.explore.lkml` files decouple explore topology from models, enabling clean project imports. |
-| *"When should we use Extends vs. Refinements?"* | Use **Refinements (`_rfn`)** to apply universal customizations in-place; use **Extends (`_ext`)** when creating new departmental variations to prevent field collision. |
-| *"How do we stop spoke developers from altering central Hub logic?"* | Enforce **"Require merge requests"** on the Hub Git repository. Only central data architects possess merge permissions on GitHub. |
-| *"How do we prevent one department's queries from slowing down another?"* | Configure separate Looker connections with dedicated GCP query/compute projects and isolated PDT scratch datasets. |
+| **Finance: High-Value Audits** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_finance/finance_high_value_audits) |
+| **Finance: Revenue & Tax** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_finance/order_items) |
+| **Finance: Order Audit Trail** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_finance/orders) |
+| **Marketing: Cohort Analysis** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/marketing_campaign_cohorts) |
+| **Marketing: Attribution & Orders** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/order_items) |
+| **Marketing: Customer Audiences** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/users) |
+| **Core Sales (Official Spoke)** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook/order_items) |
+| **GenAI Chat Telemetry** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/conversational_analytics/interaction_logs) |
+
+---
+
+## 7. Presenter Defense Cheat Sheet
+
+| Question from Audience | Best Practice Answer |
+| :--- | :--- |
+| *"Can a Spoke overwrite central calculations?"* | No. Spokes can refine or add custom dimensions, but cannot push changes upstream to the Hub repo or alter the base tables. |
+| *"How do we manage BigQuery query costs across Spokes?"* | Configure separate Looker connections with dedicated GCP query/compute projects and isolated PDT scratch datasets. |
+| *"How do we handle CI/CD across multiple instances?"* | Central Hub requires 4 Deploy Keys (DEV read/write; SIT, UAT, PROD read-only). Advanced Deploy Mode is used to tag and deploy releases. |
