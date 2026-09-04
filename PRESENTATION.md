@@ -96,8 +96,12 @@ The Looker instance has been configured with **dedicated Model Sets**, **Roles**
      - `Marketing: Campaign Attribution & Orders`
      - `Marketing: Customer Acquisition & Audiences`
      - `Marketing: Cohort Performance Analysis`
+     - `Marketing: Web Traffic & Event Clickstream` *(Spoke-Exclusive Data Ingestion!)*
    - ❌ **`Thelook Finance`** and **`Conversational Analytics`** are **completely hidden**.
-5. Open the **`Marketing: Customer Acquisition & Audiences`** explore:
+5. **Key Talking Point (Spoke-Exclusive Ingestion):**
+   - Open **`Marketing: Web Traffic & Event Clickstream`**:
+   - Explain how Marketing can ingest high-volume web event logs directly into their departmental spoke, joining with central governed `users` dimensions, without polluting the central Hub or exposing raw clickstream tables to Finance!
+6. Open the **`Marketing: Customer Acquisition & Audiences`** explore:
    - Notice the custom dimension **`Marketing Channel Group`** (`Search Engine`, `Social Ads`, `Direct Email CRM`).
    - Notice that the **`Email`** field is **hidden/inaccessible** because `can_see_pii = No`.
 
@@ -215,6 +219,7 @@ dimension: email {
 | **Finance: High-Value Audits** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_finance/finance_high_value_audits) |
 | **Finance: Revenue & Tax** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_finance/order_items) |
 | **Finance: Order Audit Trail** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_finance/orders) |
+| **Marketing: Web Traffic & Events** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/events) |
 | **Marketing: Cohort Analysis** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/marketing_campaign_cohorts) |
 | **Marketing: Attribution & Orders** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/order_items) |
 | **Marketing: Customer Audiences** | [Open Explore](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook_marketing/users) |

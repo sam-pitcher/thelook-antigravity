@@ -69,14 +69,3 @@ explore: users {
     sql_on: ${user_order_facts.user_id} = ${users.id} ;;
   }
 }
-
-explore: events {
-  label: "Events"
-  description: "Web traffic and event clickstream (Hub Governed)"
-
-  join: users {
-    type: left_outer
-    relationship: many_to_one
-    sql_on: ${users.id} = ${events.user_id} ;;
-  }
-}
