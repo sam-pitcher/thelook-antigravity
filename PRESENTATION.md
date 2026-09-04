@@ -54,16 +54,24 @@ graph TD
 
 ## 3. Real Configured Personas & Live Sudo Walkthrough
 
-The Looker instance has been configured with **4 real user personas**, **dedicated Model Sets**, and **Roles** to showcase dynamic user access control.
+The Looker instance has been configured with **dedicated Model Sets**, **Roles**, and **User Attributes** to showcase dynamic user access control.
 
-### Configured Persona Roster
+> [!TIP]
+> **Active Sudo User on this Instance:**  
+> Use user **`shredr looker` (User ID `3`)** for live UI Sudoing.  
+> You can switch `shredr looker`'s role and PII permissions in 1 second using the helper script:  
+> `python3 scripts/set_persona.py [marketing | finance | executive | admin]`
 
-| Persona / User | Looker User ID | Assigned Role | Model Set | PII Access (`can_see_pii`) | Visible Explores in Menu |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Sara Chen** (Marketing Analyst) | `18` | `Marketing Analyst Role` (Role 48) | `marketing_model_set` (Model Set 36) | `No` | ✅ Core Sales (`thelook`)<br/>✅ Marketing Spoke (`thelook_marketing`)<br/>❌ Finance & GenAI Hidden |
-| **Alex Mercer** (Finance Auditor) | `15` | `Finance Auditor Role` (Role 49) | `finance_model_set` (Model Set 37) | `Yes` | ✅ Core Sales (`thelook`)<br/>✅ Finance Spoke (`thelook_finance`)<br/>❌ Marketing & GenAI Hidden |
-| **Elena Rostova** (Executive Leader) | `16` | `Executive Role` (Role 50) | `official_model_set` (Model Set 38) | `No` | ✅ Core Sales (`thelook`)<br/>❌ All Departmental Spokes Hidden |
-| **Super Admin** (Looker Admin) | `1` | `Admin` (Role 1) | `All Models` (Model Set 1) | `Yes` | ✅ **All Explores Visible** |
+---
+
+### Configured Persona Matrix
+
+| Target Persona | Helper Command | Assigned Role | Model Set | PII Access (`can_see_pii`) | Visible Explores in Menu |
+| :--- | :--- | :--- | :--- | :---: | :--- |
+| **Marketing Analyst** | `python3 scripts/set_persona.py marketing` | `Marketing Analyst Role` (ID 48) | `marketing_model_set` (ID 36) | `No` | ✅ Core Sales (`thelook`)<br/>✅ Marketing Spoke (`thelook_marketing`)<br/>❌ Finance & GenAI Hidden |
+| **Finance Auditor** | `python3 scripts/set_persona.py finance` | `Finance Auditor Role` (ID 49) | `finance_model_set` (ID 37) | `Yes` | ✅ Core Sales (`thelook`)<br/>✅ Finance Spoke (`thelook_finance`)<br/>❌ Marketing & GenAI Hidden |
+| **Executive Leader** | `python3 scripts/set_persona.py executive` | `Executive Role` (ID 50) | `official_model_set` (ID 38) | `No` | ✅ Core Sales (`thelook`)<br/>❌ All Departmental Spokes Hidden |
+| **Super Admin** | `python3 scripts/set_persona.py admin` | `Admin` (ID 2) | `All Models` (ID 1) | `Yes` | ✅ **All Explores Visible** |
 
 ---
 
@@ -76,40 +84,53 @@ The Looker instance has been configured with **4 real user personas**, **dedicat
 
 ---
 
-#### **Step 2: Sudo as Sara Chen (Marketing Analyst)**
-1. Navigate to **Admin &rarr; Users** &rarr; Find **Sara Chen** (ID `18`) &rarr; Click **Sudo**.
-2. Click **Explore** in the top navigation bar.
-3. **Point out to the Audience:**
-   - ✅ **`Marketing Spoke`** is visible with:
+#### **Step 2: Demo Marketing Persona**
+1. Run in terminal:
+   ```bash
+   python3 scripts/set_persona.py marketing
+   ```
+2. Navigate to [**Admin &rarr; Users**](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/admin/users) &rarr; Find **`shredr looker`** (ID `3`) &rarr; Click **Sudo**.
+3. Click **Explore** in the top navigation bar.
+4. **Point out to the Audience:**
+   - ✅ **`Thelook Marketing`** is visible with:
      - `Marketing: Campaign Attribution & Orders`
      - `Marketing: Customer Acquisition & Audiences`
      - `Marketing: Cohort Performance Analysis`
-   - ❌ **`Finance Spoke`** and **`Conversational Analytics`** are **completely hidden**.
-4. Open the **`Marketing: Customer Acquisition & Audiences`** explore:
+   - ❌ **`Thelook Finance`** and **`Conversational Analytics`** are **completely hidden**.
+5. Open the **`Marketing: Customer Acquisition & Audiences`** explore:
    - Notice the custom dimension **`Marketing Channel Group`** (`Search Engine`, `Social Ads`, `Direct Email CRM`).
-   - Notice that the **`Email`** field is **hidden/inaccessible** because Sara has `can_see_pii = No`.
+   - Notice that the **`Email`** field is **hidden/inaccessible** because `can_see_pii = No`.
 
 ---
 
-#### **Step 3: Sudo as Alex Mercer (Finance Auditor)**
-1. Click **Stop Sudoing** in the top bar.
-2. Go to **Admin &rarr; Users** &rarr; Find **Alex Mercer** (ID `15`) &rarr; Click **Sudo**.
-3. Click **Explore** in the top navigation bar.
-4. **Point out to the Audience:**
-   - ❌ **`Marketing Spoke`** is **completely hidden**.
-   - ✅ **`Finance Spoke`** is visible with:
+#### **Step 3: Demo Finance Persona**
+1. Click **Stop Sudoing** in the yellow top banner.
+2. Run in terminal:
+   ```bash
+   python3 scripts/set_persona.py finance
+   ```
+3. Go back to [**Admin &rarr; Users**](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/admin/users) &rarr; Sudo as **`shredr looker`** (ID `3`).
+4. Click **Explore** in the top navigation bar.
+5. **Point out to the Audience:**
+   - ❌ **`Thelook Marketing`** is **completely hidden**.
+   - ✅ **`Thelook Finance`** is visible with:
      - `Finance: Revenue & Tax Accounting`
      - `Finance: High-Value Transaction Audits`
      - `Finance: Order Audit Trail`
-5. Open **`Finance: Revenue & Tax Accounting`**:
+6. Open **`Finance: Revenue & Tax Accounting`**:
    - Add **`Order Items -> Total Net Revenue`** and **`Order Items -> Total Estimated Tax`**.
-   - Open **`Users -> Email`** &rarr; **Email is visible** because Alex has `can_see_pii = Yes`.
+   - Open **`Users -> Email`** &rarr; **Email is unmasked and visible** because `can_see_pii = Yes`.
 
 ---
 
-#### **Step 4: Sudo as Elena Rostova (Executive Leader)**
-1. Click **Stop Sudoing** &rarr; Sudo as **Elena Rostova** (ID `16`).
-2. Click **Explore** &rarr; **Point out:** Only the clean, global **`Order Items`** and **`Users`** explores appear. No departmental clutter or raw telemetry.
+#### **Step 4: Demo Executive Persona**
+1. Click **Stop Sudoing** in the top banner.
+2. Run in terminal:
+   ```bash
+   python3 scripts/set_persona.py executive
+   ```
+3. Sudo as **`shredr looker`** &rarr; Click **Explore**.
+4. **Point out to the Audience:** Only the clean, global **`Order Items`** explore appears. No departmental clutter or raw telemetry.
 
 ---
 
