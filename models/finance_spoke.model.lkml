@@ -1,18 +1,18 @@
 connection: "default_bigquery_connection"
 
 # ==============================================================================
-# FINANCE SPOKE MODEL
+# DEPARTMENTAL SPOKE MODEL: Finance
 # ==============================================================================
-# Demonstrates how the Finance department consumes central Hub explores and views,
-# then refines them with tax and margin accounting fields.
+# Consumes central Hub explores and views, then refines/extends them with accounting logic.
 # ==============================================================================
 
 # 1. Include Central Hub Governed Views & Reusable Explores
 include: "/thelook_views/**/*.view.lkml"
 include: "/explores/thelook_hub.explore.lkml"
 
-# 2. Include Finance Spoke Refinement Views
-include: "/thelook_spoke_views/finance_order_items.view.lkml"
+# 2. Include Finance Spoke Refinement and Extension Views
+include: "/spoke_views/finance_order_items_rfn.view.lkml"
+include: "/spoke_views/finance_order_items_ext.view.lkml"
 
 datagroup: finance_eod_datagroup {
   sql_trigger: SELECT CURRENT_DATE() ;;
@@ -21,15 +21,21 @@ datagroup: finance_eod_datagroup {
 
 persist_with: finance_eod_datagroup
 
-# 3. Refine Hub Explores specifically for the Finance Department
+# 3. Refined Hub Explores for Finance
 explore: +order_items {
   label: "Finance: Revenue & Tax Accounting"
-  description: "Financial performance, margin breakdown, and tax liability"
   group_label: "Finance Spoke"
 }
 
 explore: +orders {
   label: "Finance: Order Audit Trail"
-  description: "Reconciled order history"
+  group_label: "Finance Spoke"
+}
+
+# 4. Extended Custom Departmental Explore (Demonstrating Extends pattern)
+explore: finance_high_value_audits {
+  extends: [order_items]
+  from: finance_order_items_ext
+  label: "Finance: High-Value Transaction Audits"
   group_label: "Finance Spoke"
 }

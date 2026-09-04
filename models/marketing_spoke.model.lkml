@@ -1,18 +1,18 @@
 connection: "default_bigquery_connection"
 
 # ==============================================================================
-# MARKETING SPOKE MODEL
+# DEPARTMENTAL SPOKE MODEL: Marketing
 # ==============================================================================
-# Demonstrates how a departmental spoke consumes central Hub explores and views,
-# then extends and refines them with marketing-specific business logic.
+# Consumes central Hub explores and views, then refines/extends them.
 # ==============================================================================
 
 # 1. Include Central Hub Governed Views & Reusable Explores
 include: "/thelook_views/**/*.view.lkml"
 include: "/explores/thelook_hub.explore.lkml"
 
-# 2. Include Marketing Spoke Refinement Views
-include: "/thelook_spoke_views/marketing_users.view.lkml"
+# 2. Include Marketing Spoke Refinement and Extension Views
+include: "/spoke_views/marketing_users_rfn.view.lkml"
+include: "/spoke_views/marketing_users_ext.view.lkml"
 
 datagroup: marketing_daily_datagroup {
   sql_trigger: SELECT MAX(id) FROM `sampitcher-playground.the_look_ca.order_items_table` ;;
@@ -21,15 +21,21 @@ datagroup: marketing_daily_datagroup {
 
 persist_with: marketing_daily_datagroup
 
-# 3. Refine Hub Explores specifically for the Marketing Department
+# 3. Refined Hub Explores for Marketing
 explore: +order_items {
   label: "Marketing: Campaign Attribution & Orders"
-  description: "Marketing-specific order analysis with channel attribution"
   group_label: "Marketing Spoke"
 }
 
 explore: +users {
   label: "Marketing: Customer Acquisition & Audiences"
-  description: "User demographic and marketing traffic channel analysis"
+  group_label: "Marketing Spoke"
+}
+
+# 4. Extended Custom Departmental Explore (Demonstrating Extends pattern)
+explore: marketing_campaign_cohorts {
+  extends: [users]
+  from: marketing_users_ext
+  label: "Marketing: Cohort Performance Analysis"
   group_label: "Marketing Spoke"
 }

@@ -1,10 +1,10 @@
 include: "/thelook_views/order_items.view.lkml"
 
 # ==============================================================================
-# SPOKE VIEW REFINEMENT: Finance Spoke
+# SPOKE REFINEMENT VIEW: order_items_rfn
 # ==============================================================================
-# Refines the central Hub 'order_items' view to add financial margin calculations,
-# estimated tax, and accounting reporting logic.
+# Refines 'order_items' in place for Finance accounting logic.
+# File Naming Standard: [view_name]_rfn.view.lkml
 # ==============================================================================
 
 view: +order_items {

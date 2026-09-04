@@ -1,10 +1,10 @@
 include: "/thelook_views/users.view.lkml"
 
 # ==============================================================================
-# SPOKE VIEW REFINEMENT: Marketing Spoke
+# SPOKE REFINEMENT VIEW: users_rfn
 # ==============================================================================
-# Refines the central Hub 'users' view to add department-specific dimensions
-# and measures without modifying the core governed Hub code.
+# Modifies existing 'users' view in place without creating a new namespace.
+# File Naming Standard: [view_name]_rfn.view.lkml
 # ==============================================================================
 
 view: +users {
