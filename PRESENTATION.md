@@ -23,7 +23,44 @@ graph TD
 
 ---
 
-## 2. Master Demo Script & Presentation Flow
+## 2. Important Architectural Distinction: Demo Sandbox vs. Multi-Project Production
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ PRODUCTION ARCHITECTURE (Multi-Project)                                                         │
+│                                                                                                  │
+│  [ Central Hub Repo / Project ]       [ Marketing Spoke Repo ]         [ Finance Spoke Repo ]    │
+│  • project_name: "looker-hub"         • manifest.lkml                  • manifest.lkml           │
+│  • thelook_views/                     • remote_dependency: looker-hub  • remote_dependency       │
+│  • explores/thelook_hub.explore.lkml  • include: "//looker-hub/..."    • include: "//looker-hub" │
+│  • 🛑 ZERO .model.lkml files          • marketing_spoke.model.lkml     • finance_spoke.model.lkml│
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                              ▲
+                                              │ (Simulated in this Demo)
+                                              ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ DEMO SANDBOX ARCHITECTURE (Single Project: thelook-antigravity)                                  │
+│                                                                                                  │
+│  All components live in this single project so you can demo everything in one IDE session:       │
+│  • Hub Layer: /thelook_views/ & /explores/thelook_hub.explore.lkml                               │
+│  • Spoke Models: /models/marketing_spoke.model.lkml & /models/finance_spoke.model.lkml           │
+│  • Spoke Customizations: /spoke_views/ (*_rfn.view.lkml & *_ext.view.lkml)                       │
+│  • Production Multi-Project Templates: /examples/spoke_project_template/                         │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+> [!NOTE]
+> **Why Separate Projects in Production?**
+> 1. **Git Isolation**: Marketing developers cannot modify or open pull requests on the Hub or Finance codebases.
+> 2. **Independent Deployment Cycles**: Marketing can push and deploy code without waiting for Finance or Central BI release windows.
+> 3. **True Hub Purity**: The Hub project has **no `.model.lkml` files**, preventing any uncurated explores from appearing on the instance.
+>
+> **Why a Single Project for this Demo?**
+> Setting up multiple projects in a demo requires managing 4 separate Git repositories, 4 deploy keys, and multiple Looker project setups. Consolidating into this demo project allows you to showcase **every LookML pattern**, **explore template**, **refinement**, **extension**, and **Model Set role filtering** smoothly from a single screen.
+
+---
+
+## 3. Master Demo Script & Presentation Flow
 
 ### Phase 1: The Central Governed Hub (The "Single Source of Truth")
 
