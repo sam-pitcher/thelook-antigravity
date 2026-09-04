@@ -42,6 +42,7 @@ view: users {
   dimension: email {
     type: string
     sql: ${TABLE}.email ;;
+    required_access_grants: [pii_data]
   }
 
   dimension: first_name {

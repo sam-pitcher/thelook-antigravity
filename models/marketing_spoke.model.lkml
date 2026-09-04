@@ -19,6 +19,11 @@ datagroup: marketing_daily_datagroup {
   max_cache_age: "2 hours"
 }
 
+access_grant: pii_data {
+  user_attribute: can_see_pii
+  allowed_values: ["Yes", "yes", "true"]
+}
+
 persist_with: marketing_daily_datagroup
 
 # 3. Refined Hub Explores for Marketing

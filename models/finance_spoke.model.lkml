@@ -19,6 +19,11 @@ datagroup: finance_eod_datagroup {
   max_cache_age: "12 hours"
 }
 
+access_grant: pii_data {
+  user_attribute: can_see_pii
+  allowed_values: ["Yes", "yes", "true"]
+}
+
 persist_with: finance_eod_datagroup
 
 # 3. Refined Hub Explores for Finance
