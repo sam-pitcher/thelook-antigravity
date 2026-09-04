@@ -1,0 +1,12 @@
+# VS Code / IDE settings
+.vscode/settings.json
+
+# OS files
+.DS_Store
+*.log
+
+# Gemini / Jetski
+.gemini/
+
+# Backup files
+*.bak
