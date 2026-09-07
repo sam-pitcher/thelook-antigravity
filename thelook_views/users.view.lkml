@@ -4,12 +4,6 @@ view: users {
   extends: [common_fields]
   sql_table_name: `bigquery-public-data.thelook_ecommerce.users` ;;
 
-  dimension: id {
-    primary_key: yes
-    type: number
-    sql: ${TABLE}.id ;;
-  }
-
   dimension: age {
     type: number
     sql: ${TABLE}.age ;;

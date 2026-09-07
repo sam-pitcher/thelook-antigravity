@@ -4,12 +4,6 @@ view: order_items {
   extends: [common_fields]
   sql_table_name: `bigquery-public-data.thelook_ecommerce.order_items` ;;
 
-  dimension: id {
-    primary_key: yes
-    type: number
-    sql: ${TABLE}.id ;;
-  }
-
   dimension_group: created {
     type: time
     timeframes: [raw, time, date, week, month, quarter, year]
