@@ -24,11 +24,6 @@
 ### 🎯 Slide Purpose
 Introduce the core foundation: a clean, central Hub repository that defines enterprise Single Source of Truth (SSOT) logic, explicit primary keys, PII access grants, and generic explore topology templates.
 
-> [!IMPORTANT]
-> **Zero Models in the Hub:**  
-> The Hub contains **no model files (`.model.lkml`)** and **no queryable Explores**.  
-> It serves exclusively as a modular library of governed views and `.explore.lkml` templates that are imported across the Looker instance.
-
 ### 🔗 Direct Looker Code Links
 * 📄 **Hub Manifest:** [`manifest.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-antigravity/files/manifest.lkml) &rarr; Declares `project_name: "thelook-antigravity"`
 * 📄 **Governed Core View:** [`thelook_views/users.view.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-antigravity/files/thelook_views/users.view.lkml) &rarr; Contains primary keys & central `pii_data` access grants.
@@ -37,7 +32,6 @@ Introduce the core foundation: a clean, central Hub repository that defines ente
 
 ### 💡 Presenter Talking Points
 * *"Everything starts in the Central Hub (`thelook-antigravity`). This project is strictly controlled by central data architects."*
-* *"Crucially, there are NO models in the Hub and NO queryable Explores. It is created from a blank project without a model file, organizing code cleanly into `thelook_views/` and `explores/`."*
 * *"Notice that generic explores in [`thelook_hub.explore.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-antigravity/files/explores/thelook_hub.explore.lkml) have `hidden: yes` by default. They serve as reusable topology blueprints so spokes never inherit unneeded explores automatically."*
 * *"Universal policies — like requiring the `can_see_pii` attribute for customer emails — are defined once here in the Hub and automatically protect every departmental downstream spoke."*
 
@@ -152,7 +146,7 @@ Open the live Finance Explores and show how Refinements, Extensions, and PII acc
 
 ---
 
-# Slide 5: The Marketing Spoke — Bespoke Ingestion (Events & Clickstream)
+# Demo Slide 5: The Marketing Spoke — Bespoke Ingestion (Events & Clickstream)
 
 ### 🎯 Slide Purpose
 Demonstrate the killer enterprise capability: **Spoke-Exclusive Data Ingestion**, where high-volume raw tables are ingested directly into a spoke without polluting the Hub or exposing event logs to other departments.
@@ -184,7 +178,7 @@ explore: events {
 
 ---
 
-# Slide 6: Marketing in Action — Refined Audiences & PII Masking
+# Demo Slide 6: Marketing in Action — Refined Audiences & PII Masking
 
 ### 🎯 Slide Purpose
 Execute the live Marketing explores and demonstrate how custom channel attribution works while central PII masking is strictly enforced.
@@ -207,7 +201,7 @@ Execute the live Marketing explores and demonstrate how custom channel attributi
 
 ---
 
-# Slide 7: Enterprise Governance — Live Persona Switching (Sudo Walkthrough)
+# Demo Slide 7: Enterprise Governance — Live Persona Switching (Sudo Walkthrough)
 
 ### 🎯 Slide Purpose
 Demonstrate dynamic menu adaptation and multi-tenant security live in the Looker UI using the 1-command persona switcher.
@@ -239,7 +233,7 @@ Demonstrate dynamic menu adaptation and multi-tenant security live in the Looker
 
 ---
 
-# Slide 8: Executive Summary & Live Links Master Reference
+# Demo Slide 8: Executive Summary & Live Links Master Reference
 
 ### 🎯 Slide Purpose
 Conclude the demonstration with an executive comparison matrix and provide direct links for audience evaluation.
@@ -261,7 +255,6 @@ Conclude the demonstration with an executive comparison matrix and provide direc
 | Component | Repository / Project | Key File / Direct Link |
 | :--- | :--- | :--- |
 | **Central Hub** | `thelook-antigravity` | [`manifest.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-antigravity/files/manifest.lkml) • [`explores/thelook_hub.explore.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-antigravity/files/explores/thelook_hub.explore.lkml) |
-| **Official Spoke** | `thelook-official-spoke` | [`thelook.model.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-official-spoke/files/models/thelook.model.lkml) • [GitHub Repo](https://github.com/sam-pitcher/thelook-official-spoke) |
 | **Finance Spoke** | `thelook-finance-spoke` | [`manifest.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-finance-spoke/files/manifest.lkml) • [`models/thelook_finance.model.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-finance-spoke/files/models/thelook_finance.model.lkml) |
 | **Marketing Spoke** | `thelook-marketing-spoke` | [`manifest.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-marketing-spoke/files/manifest.lkml) • [`views/events.view.lkml`](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/projects/thelook-marketing-spoke/files/views/events.view.lkml) |
 | **Core Sales Explore** | Official Spoke | [Explore Core Sales](https://915eab0a-ce5e-423b-81fb-1e93c2f3424d.looker.app/explore/thelook/order_items) |

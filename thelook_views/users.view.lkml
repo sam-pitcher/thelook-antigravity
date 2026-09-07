@@ -2,7 +2,7 @@ include: "common_fields.view"
 
 view: users {
   extends: [common_fields]
-  sql_table_name: `sampitcher-playground.the_look_ca.users_table` ;;
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.users` ;;
 
   dimension: id {
     primary_key: yes

@@ -1,5 +1,5 @@
 view: orders {
-  sql_table_name: `sampitcher-playground.the_look_ca.orders_table` ;;
+  sql_table_name: `bigquery-public-data.thelook_ecommerce.orders` ;;
 
   dimension: order_id {
     primary_key: yes

@@ -6,7 +6,7 @@ view: user_order_facts {
            SUM(sale_price) as lifetime_revenue,
            AVG(sale_price) as avg_order_value,
            STRING_AGG(DISTINCT status, ", ") as order_statuses
-         FROM `sampitcher-playground.the_look_ca.order_items_table`
+         FROM `bigquery-public-data.thelook_ecommerce.order_items`
          GROUP BY 1 ;;
     datagroup_trigger: thelook_default_datagroup
     cluster_keys: ["user_id"]
