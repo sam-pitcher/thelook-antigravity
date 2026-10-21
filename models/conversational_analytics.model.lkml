@@ -1,4 +1,5 @@
 connection: "default_bigquery_connection"
+# connection: "bigquery_oauth"
 
 include: "/conversational_analytics_views/*.view.lkml"
 
