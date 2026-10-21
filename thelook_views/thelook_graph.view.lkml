@@ -17,6 +17,7 @@ view: thelook_graph {
     sql: order_items_status ;;
   }
 
+  # --- Customer Node Properties ---
   dimension: user_id {
     type: number
     sql: users_id ;;
@@ -47,6 +48,7 @@ view: thelook_graph {
     sql: users_traffic_source ;;
   }
 
+  # --- Product Node Properties ---
   dimension: product_id {
     type: number
     sql: products_id ;;
@@ -72,21 +74,28 @@ view: thelook_graph {
     sql: products_department ;;
   }
 
-  measure: total_sale_price {
+  # --- Predefined BigQuery Graph Base Measures ---
+  measure: total_sales {
     type: number
-    sql: order_items_total_sale_price ;;
+    sql: order_items_total_sales ;;
     value_format_name: usd
   }
 
-  measure: total_retail_price {
+  measure: total_order_items {
     type: number
-    sql: products_total_retail_price ;;
+    sql: order_items_total_order_items ;;
+  }
+
+  measure: total_retail_value {
+    type: number
+    sql: products_total_retail_value ;;
     value_format_name: usd
   }
 
-  measure: average_sale_price {
+  # --- Looker Derived Non-Aggregate Measure ---
+  measure: average_item_sale_price {
     type: number
-    sql: ${total_sale_price} / NULLIF(${order_item_id}, 0) ;;
+    sql: ${total_sales} / NULLIF(${total_order_items}, 0) ;;
     value_format_name: usd
   }
 }
