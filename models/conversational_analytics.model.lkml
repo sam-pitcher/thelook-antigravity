@@ -22,8 +22,14 @@ explore: interaction_logs {
 }
 
 include: "/thelook_views/thelook_graph.view.lkml"
+include: "/thelook_views/product_affinity_graph.view.lkml"
 
 explore: thelook_graph {
   label: "TheLook Knowledge Graph"
   description: "In-database BigQuery Property Graph analytic model explore"
+}
+
+explore: product_affinity_graph {
+  label: "Product Recommendations (Graph Multi-Hop)"
+  description: "Collaborative filtering and affinity recommendations traversed across multi-hop graph paths"
 }
