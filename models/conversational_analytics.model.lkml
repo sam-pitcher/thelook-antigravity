@@ -19,3 +19,10 @@ explore: interaction_logs {
   }
 
 }
+
+include: "/thelook_views/thelook_graph.view.lkml"
+
+explore: thelook_graph {
+  label: "TheLook Knowledge Graph"
+  description: "In-database BigQuery Property Graph analytic model explore"
+}

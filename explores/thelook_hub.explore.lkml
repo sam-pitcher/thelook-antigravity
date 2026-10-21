@@ -72,3 +72,8 @@ explore: users {
     sql_on: ${user_order_facts.user_id} = ${users.id} ;;
   }
 }
+
+explore: thelook_graph {
+  label: "TheLook Knowledge Graph"
+  description: "In-database BigQuery Property Graph analytic model explore"
+}
