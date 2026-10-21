@@ -74,6 +74,27 @@ view: thelook_graph {
     sql: products_department ;;
   }
 
+  # --- Distribution Center Node Properties (Hop 3) ---
+  dimension: distribution_center_id {
+    type: number
+    sql: distribution_centers_id ;;
+  }
+
+  dimension: distribution_center_name {
+    type: string
+    sql: distribution_centers_name ;;
+  }
+
+  dimension: distribution_center_latitude {
+    type: number
+    sql: distribution_centers_latitude ;;
+  }
+
+  dimension: distribution_center_longitude {
+    type: number
+    sql: distribution_centers_longitude ;;
+  }
+
   # --- Predefined BigQuery Graph Base Measures ---
   measure: total_sales {
     type: number
