@@ -1,5 +1,5 @@
 view: thelook_graph {
-  sql_analytic_model_name: `sampitcher-playground.the_look.thelook_graph` ;;
+  sql_analytic_model_name: sampitcher-playground.the_look.thelook_graph ;;
 
   dimension: order_item_id {
     primary_key: yes
